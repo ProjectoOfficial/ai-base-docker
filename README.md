@@ -9,18 +9,15 @@ Docker allows you to create something similar to a virtual machine, where any ac
 
 in addition to proposing this tool which I think is useful for better managing one's environment, and in any case it is a skill in great demand even within companies (it is worth learning to use it!), I also propose to better organize research projects in this way :
 - **`project-directory`**: a folder with the name of your research project.
-  - **`ai-base-docker`**: import here the Docker as submodule.
+  - **`ai-base-docker`**: import here the *ai-base-docker* as submodule.
   - **`src`**: the main directory where you implement the project.
     - **`requirements`**: the directory where you specify all the requirements files
         - **`base.txt`**: base requirements
         - **`devel.txt`**: development requirements
 
 ## Docker setup
-1. Please follow docker base installation:
-    ```
+1. Please follow docker base installation: 
     https://docs.docker.com/engine/install/
-
-    ```
 
 2. Once docker has been installed, install nvidia-docker2 for GPU support:
     ```
@@ -29,17 +26,27 @@ in addition to proposing this tool which I think is useful for better managing o
     sudo apt-get install -y nvidia-docker2
     sudo systemctl restart docker
     ```
-3. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
+
+3. Add required permissions to your user in order to perform actions with docker on containers
+    ```
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+
+4. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
     ```
     git submodule add https://github.com/ProjectoOfficial/ai-base-docker
     git fetch
     git pull
+    ```
 
+    ```
     cd ai-base-docker
     ./build.sh
     ```
 
-4. run docker image:
+5. run docker image:
     ```
     ./run.sh
     ```
@@ -59,4 +66,4 @@ It's not over here, one last step is missing! Go to File>Open Folder -> enter "/
 
 If you find errors or have suggestions for improving this project, feel free to open an issue or send a pull request.
 
-tested with version: 24.0.7
+tested with docker version: 24.0.7
