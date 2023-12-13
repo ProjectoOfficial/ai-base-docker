@@ -32,6 +32,7 @@ RUN rm -f /etc/apt/sources.list.d/*.list
 # install Ubuntu Software needed for the development (DEBIAN_FRONTEND="noninteractive" needed to avoid human interaction in the process)
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" && apt-get install -y -q\
     sudo \
+    git \
     curl \
     wget \
     bash-completion \
