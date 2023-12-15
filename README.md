@@ -19,7 +19,7 @@ in addition to proposing this tool which I think is useful for better managing o
 1. Please follow docker base installation: 
     https://docs.docker.com/engine/install/
 
-2. Once docker has been installed, install nvidia-docker2 for GPU support:
+2. Once docker has been installed, install nvidia-docker2 for GPU support (otherwise you can follow [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) procedure (Recommended) ):
     ```
     distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
     sudo apt-get update
@@ -35,12 +35,25 @@ in addition to proposing this tool which I think is useful for better managing o
     ```
 
 4. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
-    ```
-    git submodule add https://github.com/ProjectoOfficial/ai-base-docker
-    git fetch
-    git pull
-    ```
-
+    
+    - Importing ai-base-docker as submodule (to use it as it is)
+        ```
+        git submodule add https://github.com/ProjectoOfficial/ai-base-docker
+        git fetch
+        git pull
+        ```
+    - Cloning: recommended when you need to work on a private repository. Delete .git directory within ai-base-docker, in this way you can push your changes without any issue
+        ```
+        git clone https://github.com/ProjectoOfficial/ai-base-docker
+        ```
+    - Forking: recommended if you need it but just for a public project (then you create a new branch per each project you need to work on). Click on [Fork](https://github.com/ProjectoOfficial/ai-base-docker/fork) and then:
+        ```
+        git clone https://github.com/your-github-id/ai-base-docker
+        cd ai-base-docker
+        git checkout -b project-branch-name
+        ```
+    
+    then go to ai-base-docker directory and build the docker
     ```
     cd ai-base-docker
     ./build.sh
@@ -50,6 +63,8 @@ in addition to proposing this tool which I think is useful for better managing o
     ```
     ./run.sh
     ```
+    - params:
+        - $1 (data directory): optionally you can specify a supplementary volume (directory) which tipically can be used as data directory (where you store your datasets). You will find it under ```/home/user/data```
 
 ## Coding
 To be able to program and execute the code inside the docker at the same time (permanent programming, the files will remain even when the docker is closed) I recommend using [VSCode](https://code.visualstudio.com/).
@@ -61,6 +76,7 @@ As extensions to do this I use the following. Go to the VSCode marketplace (CTRL
 once the extensions have been installed and after launching the docker *run* script, in the menu on the left of VSCode you must select the whale icon (docker), and under the "individual containers" item you will find the container you have just launched with a green arrow next to it. By clicking with the right mouse button on it you will find "attach with VSCode", and this will open a new window for programming inside the docker.
 
 It's not over here, one last step is missing! Go to File>Open Folder -> enter "/home/user" as the path
+
 
 ## Contributions
 

@@ -1,11 +1,15 @@
 # OS SETTINGS
 # Here you can choose the OS and the CUDA version you want to mount 
 
-FROM nvidia/cuda:11.3.1-base-ubuntu20.04
+FROM nvidia/cuda:12.0.1-devel-ubuntu22.04
+
 
 # other examples:
 # FROM nvidia/cuda:11.7.1-base-ubuntu22.04
-# FROM nvidia/cuda:11.8.0-base-ubuntu18.04
+# FROM nvidia/cuda:11.3.1-base-ubuntu20.04 # supports python 3.8 - 3.9
+# FROM nvidia/cuda:11.8.0-base-ubuntu18.04 # supports python 3.6 - 3.7
+# FROM nvidia/cuda:11.1.1-devel-ubuntu20.04 # supports python 3.8 - 3.9
+# FROM nvidia/cuda:11.8.0-devel-ubuntu18.04 # supports python 3.6 - 3.7
 
 # you can find more versions here:
 # https://hub.docker.com/r/nvidia/cuda/
@@ -35,18 +39,20 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" && apt-get install -y -q\
     git \
     curl \
     wget \
+    bash \
     bash-completion \
     build-essential \
     ffmpeg \
-    python3.9 \
-    python3.9-dev \
+    python3.11 \
+    python3.11-dev \
     python3-pip \
     python3-tk \
 && rm -rf /var/lib/apt/lists/*
 
 # set python update alternatives - the highest is the preferred one
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 2
+RUN update-alternatives --config python3
 
 # remove python2
 RUN ln -sf /usr/bin/python3 /usr/bin/python && \
@@ -95,6 +101,9 @@ COPY ./src/requirements/* ./tmp/
 RUN for file in ./tmp/*; do \
         python3 -m pip install -r $file; \
     done
+
+# if you need to download .whl packages from a link
+# RUN python -m pip download --only-binary :all: --dest . --no-cache PACKAGE-DOWNLOAD-LINK.whl
 
 # remove all the created/copied/moved file by the docker
 RUN rm -rf *

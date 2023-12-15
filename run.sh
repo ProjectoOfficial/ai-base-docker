@@ -3,6 +3,11 @@
 # exit on error
 set -e
 
+if [ "$#" -gt 1 ]; then
+    echo "Usage: $0 <data directory path>"
+    exit 1
+fi
+
 IMAGE_NAME="ai-base-docker"
 IMAGE_TAG="1.0.0"
 
@@ -14,6 +19,11 @@ PATH_TO_SRC_FOLDER=""
 
 MOUNT_SRC_PATH="-v $(dirname $PWD)/src:/home/user/src"
 MOUNT_WEBCAM=""
+MOUNT_DATA=""
+
+if [ -n "$1" ]; then
+    MOUNT_DATA=$1
+fi
 
 if echo "$1" | grep -q "webcam"; then
         video_device=$(ls /dev/video* 2>/dev/null | head -n 1)
@@ -26,6 +36,7 @@ if echo "$1" | grep -q "webcam"; then
 fi
 
 # x11 forwarding
+echo "Setting x11 forwarding"
 XSOCK=/tmp/.x11-unix
 XAUTH=/tmp/.docker.xauth
 xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
@@ -36,6 +47,13 @@ base_options="--shm-size 2GB -ti --rm "                                 # set co
                                                                         # start container with interactive mode
                                                                         # and enable auto-remove of the container
 
+if command nvcc -v > /dev/null 2>&1 && command nvidia-smi > /dev/null 2>&1; then
+        base_options+="--gpus all "                                     # eat all gpus
+        options+="--device=/dev/nvidia-modeset "                        # nvidia modeset map to support graphic card acceleration
+fi
+
+
+echo "preparing docker run options"
 options="-v /media:/media "                                             # mount media directory
 options+="-v /usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu "      # mount GNU C library
 options+="${MOUNT_SRC_PATH} "                                           # mount project directory
@@ -49,12 +67,12 @@ options+="--net=host "                                                  # add in
 options+="--group-add video "                                           # add container to video group
 options+="--device=/dev/dri:/dev/dri "                                  # map host DRI (Direct Rendering Infrastructure) to container
 options+="${MOUNT_WEBCAM} "                                             # mount webcam path
-options+="$IMAGE_NAME:$IMAGE_TAG "                                      # set image name and image tag
 
-if command nvidia-docker > /dev/null 2>&1 && command nvcc -v > /dev/null 2>&1 && command nvidia-smi > /dev/null 2>&1; then
-        launch_command="nvidia-docker run "
-        options+="--device=/dev/nvidia-modeset "                        # nvidia modeset map to support graphic card acceleration
-        base_options+="--gpus all "                                     # eat all gpus
+if [ ! -z "$MOUNT_DATA" ]; then
+    echo "mounting data directory: $MOUNT_DATA"
+    options+="-v ${MOUNT_DATA}:/home/user/data "
 fi
+
+options+="$IMAGE_NAME:$IMAGE_TAG "                                      # set image name and image tag
 
 $launch_command $base_options $options
