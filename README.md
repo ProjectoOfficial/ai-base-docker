@@ -19,22 +19,12 @@ in addition to proposing this tool which I think is useful for better managing o
 1. Please follow docker base installation: 
     https://docs.docker.com/engine/install/
 
-2. Once docker has been installed, install nvidia-docker2 for GPU support (otherwise you can follow [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) procedure (Recommended) ):
+2. Assert you have installed NVIDIA drivers with CUDA
     ```
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-    sudo apt-get update
-    sudo apt-get install -y nvidia-docker2
-    sudo systemctl restart docker
+    https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html
     ```
 
-3. Add required permissions to your user in order to perform actions with docker on containers
-    ```
-    sudo groupadd docker
-    sudo usermod -aG docker $USER
-    newgrp docker
-    ```
-
-4. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
+3. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
     
     - Importing ai-base-docker as submodule (to use it as it is)
         ```
@@ -56,12 +46,12 @@ in addition to proposing this tool which I think is useful for better managing o
     then go to ai-base-docker directory and build the docker
     ```
     cd ai-base-docker
-    ./build.sh
+    ./build.bat
     ```
 
-5. run docker image:
+4. run docker image:
     ```
-    ./run.sh
+    ./run.bat
     ```
     - params:
         - $1 (data directory): optionally you can specify a supplementary volume (directory) which tipically can be used as data directory (where you store your datasets). You will find it under ```/home/user/data```
