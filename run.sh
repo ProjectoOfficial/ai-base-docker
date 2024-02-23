@@ -22,6 +22,7 @@ base_options="--shm-size 2GB -ti --rm "                                 # set co
                                                                         # start container with interactive mode
                                                                         # and enable auto-remove of the container
 
+
 if command nvcc -V > /dev/null 2>&1 && command nvidia-smi > /dev/null 2>&1; then
         base_options+="--gpus all "                                     # eat all gpus
         options+="--device=/dev/nvidia-modeset "                        # nvidia modeset map to support graphic card acceleration

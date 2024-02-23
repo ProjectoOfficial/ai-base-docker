@@ -63,11 +63,14 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python && \
 # USER SETTINGS
 
 # the docker's user will be 'user' and its home will be '/user/home'
+ARG UID=1000
+ARG GID=1000
 ARG USER_NAME=user
 ARG USER_HOME=/home/$USER_NAME
 
 # create a new user within the Docker container
-RUN useradd -m -s /bin/bash $USER_NAME \
+RUN groupadd -g $GID -o $USER_NAME \
+    && useradd -m -u $UID -g $GID -o -s /bin/bash $USER_NAME \
     && echo "$USER_NAME:Docker!" | chpasswd \
     && mkdir -p /src && chown -R $USER_NAME:$USER_NAME /src \
     && mkdir -p /etc/sudoers.d \

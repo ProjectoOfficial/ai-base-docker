@@ -10,7 +10,8 @@ echo "setting main directory as $PWD"
 
 # Run the build of the Docker image
 echo "building: $MAIN_DIR/Dockerfile"
-docker build -t "$IMAGE_NAME:$IMAGE_TAG" -f "$MAIN_DIR/ai-base-docker/Dockerfile" "$MAIN_DIR"
+docker build -t "$IMAGE_NAME:$IMAGE_TAG" -f "$MAIN_DIR/ai-base-docker/Dockerfile" "$MAIN_DIR" \
+        --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USER_NAME=$(id -un)
 
 
 # Check if the build has been successfully completed
