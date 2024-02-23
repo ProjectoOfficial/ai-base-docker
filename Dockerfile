@@ -5,6 +5,7 @@ FROM nvidia/cuda:12.0.1-devel-ubuntu22.04
 
 
 # other examples:
+# FROM ubuntu:22.04 # only ubuntu without CUDA
 # FROM nvidia/cuda:11.7.1-base-ubuntu22.04
 # FROM nvidia/cuda:11.3.1-base-ubuntu20.04 # supports python 3.8 - 3.9
 # FROM nvidia/cuda:11.8.0-base-ubuntu18.04 # supports python 3.6 - 3.7

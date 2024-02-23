@@ -3,37 +3,12 @@
 # exit on error
 set -e
 
-if [ "$#" -gt 1 ]; then
-    echo "Usage: $0 <data directory path>"
-    exit 1
-fi
-
 IMAGE_NAME="ai-base-docker"
-IMAGE_TAG="1.0.0"
+IMAGE_TAG="latest"
 
 echo $IMAGE_NAME:$IMAGE_TAG started!
 
 CONTAINER_NAME="ai-base"
-
-PATH_TO_SRC_FOLDER=""
-
-MOUNT_SRC_PATH="-v $(dirname $PWD)/src:/home/user/src"
-MOUNT_WEBCAM=""
-MOUNT_DATA=""
-
-if [ -n "$1" ]; then
-    MOUNT_DATA=$1
-fi
-
-if echo "$1" | grep -q "webcam"; then
-        video_device=$(ls /dev/video* 2>/dev/null | head -n 1)
-        if [ -n "$video_device" ]; then
-                echo "setting device: $video_device"
-                MOUNT_WEBCAM="--device ${video_device}:${video_device}"
-        else
-                echo "Could not find any video input device"
-        fi
-fi
 
 # x11 forwarding
 echo "Setting x11 forwarding"
@@ -47,7 +22,7 @@ base_options="--shm-size 2GB -ti --rm "                                 # set co
                                                                         # start container with interactive mode
                                                                         # and enable auto-remove of the container
 
-if command nvcc -v > /dev/null 2>&1 && command nvidia-smi > /dev/null 2>&1; then
+if command nvcc -V > /dev/null 2>&1 && command nvidia-smi > /dev/null 2>&1; then
         base_options+="--gpus all "                                     # eat all gpus
         options+="--device=/dev/nvidia-modeset "                        # nvidia modeset map to support graphic card acceleration
 fi
@@ -55,7 +30,6 @@ fi
 
 echo "preparing docker run options"
 options="-v /media:/media "                                             # mount media directory
-options+="-v /usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu "      # mount GNU C library
 options+="${MOUNT_SRC_PATH} "                                           # mount project directory
 options+="-e http_proxy -e https_proxy "                                # set environment variables for http and https
 options+="-e "DISPLAY" --env "QT_X11_NO_MITSHM=1" "                     # X11 display and disable memory share in MIT-SHM for Qt applications
@@ -66,12 +40,39 @@ options+="--user $(id -u):$(id -g) "                                    # sync u
 options+="--net=host "                                                  # add internet connetion
 options+="--group-add video "                                           # add container to video group
 options+="--device=/dev/dri:/dev/dri "                                  # map host DRI (Direct Rendering Infrastructure) to container
-options+="${MOUNT_WEBCAM} "                                             # mount webcam path
+options+="-v $(dirname $PWD)/src:/home/user/src "                       # mount src path
 
-if [ ! -z "$MOUNT_DATA" ]; then
-    echo "mounting data directory: $MOUNT_DATA"
-    options+="-v ${MOUNT_DATA}:/home/user/data "
-fi
+CAMERA_MOUNTED=0
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -w)
+            video_device=$(ls /dev/video* 2>/dev/null | head -n 1)
+            if [ -n "$video_device" ] && [ "$CAMERA_MOUNTED" -eq 0 ]; then
+                echo "setting device: $video_device"
+                options+="--device ${video_device}:${video_device} "
+                CAMERA_MOUNTED=1
+            else
+                echo "Could not find any video input device or camera already mounted"
+            fi
+            ;;
+        -d)
+            shift
+            if [ -n "$1" ] && [ -d "$1" ]; then
+                last_dir=$(basename "$1")
+                echo "mounting data directory: $last_dir"
+                options+="-v ${1}:/home/user/$last_dir "
+            else
+                echo "Invalid or missing directory path after -d option"
+                exit 1
+            fi
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 options+="$IMAGE_NAME:$IMAGE_TAG "                                      # set image name and image tag
 
