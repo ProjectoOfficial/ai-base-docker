@@ -4,7 +4,7 @@
 set -e
 
 IMAGE_NAME="ai-base-docker"
-IMAGE_TAG="1.0.0"
+IMAGE_TAG="latest"
 
 echo $IMAGE_NAME:$IMAGE_TAG started!
 
