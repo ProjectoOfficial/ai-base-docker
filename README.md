@@ -21,9 +21,21 @@ in addition to proposing this tool which I think is useful for better managing o
 
 2. Once docker has been installed, install nvidia-docker2 for GPU support (otherwise you can follow [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) procedure (Recommended) ):
     ```
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    ```
+
+    update and install the nvidia container tool
+    ```
     sudo apt-get update
-    sudo apt-get install -y nvidia-docker2
+    sudo apt-get install -y nvidia-container-toolkit
+    ```
+
+    configure nvidia container tool
+    ```
+    sudo nvidia-ctk runtime configure --runtime=docker
     sudo systemctl restart docker
     ```
 
@@ -64,7 +76,8 @@ in addition to proposing this tool which I think is useful for better managing o
     ./run.sh
     ```
     - params:
-        - $1 (data directory): optionally you can specify a supplementary volume (directory) which tipically can be used as data directory (where you store your datasets). You will find it under ```/home/user/data```
+        - (-d /path/to/dir_to_mount): optionally you can specify supplementary volumes (directory) which tipically can be used as data directory (where you store your datasets). You will find it under ```/home/user/src```
+        - (-w): enables the docker to mount a webcam
 
 ## Coding
 To be able to program and execute the code inside the docker at the same time (permanent programming, the files will remain even when the docker is closed) I recommend using [VSCode](https://code.visualstudio.com/).
