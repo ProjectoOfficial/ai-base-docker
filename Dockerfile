@@ -62,7 +62,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python && \
 # -----------------------------------------------------------------------------------------------------------------------------------------------------
 # USER SETTINGS
 
-# the docker's user will be 'user' and its home will be '/user/home'
+# the docker's user will be $USER and its home will be '/$USER/home'
 ARG UID=1000
 ARG GID=1000
 ARG USER_NAME=user
@@ -76,9 +76,6 @@ RUN groupadd -g $GID -o $USER_NAME \
     && mkdir -p /etc/sudoers.d \
     && usermod -aG video $USER_NAME \
     && echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
-
-USER $USER_NAME
-WORKDIR $USER_HOME
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------------
 # FINAL SETUPS
@@ -108,6 +105,9 @@ RUN for file in ./tmp/*; do \
 
 # if you need to download .whl packages from a link
 # RUN python -m pip download --only-binary :all: --dest . --no-cache PACKAGE-DOWNLOAD-LINK.whl
+
+USER $USER_NAME
+WORKDIR $USER_HOME
 
 # remove all the created/copied/moved file by the docker
 RUN rm -rf *
