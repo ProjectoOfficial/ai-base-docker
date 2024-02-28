@@ -40,7 +40,7 @@ options+="--user $(id -u):$(id -g) "                                    # sync u
 options+="--net=host "                                                  # add internet connetion
 options+="--group-add video "                                           # add container to video group
 options+="--device=/dev/dri:/dev/dri "                                  # map host DRI (Direct Rendering Infrastructure) to container
-options+="-v $(dirname $PWD)/src:/home/user/src "                       # mount src path
+options+="-v $(dirname $PWD)/src:/home/$(id -un)/src "                       # mount src path
 
 CAMERA_MOUNTED=0
 while [ "$#" -gt 0 ]; do
@@ -60,7 +60,7 @@ while [ "$#" -gt 0 ]; do
             if [ -n "$1" ] && [ -d "$1" ]; then
                 last_dir=$(basename "$1")
                 echo "mounting data directory: $last_dir"
-                options+="-v ${1}:/home/user/$last_dir "
+                options+="-v ${1}:/home/$(id -un)/$last_dir "
             else
                 echo "Invalid or missing directory path after -d option"
                 exit 1

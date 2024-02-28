@@ -62,20 +62,20 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python && \
 # -----------------------------------------------------------------------------------------------------------------------------------------------------
 # USER SETTINGS
 
-# the docker's user will be 'user' and its home will be '/user/home'
+# the docker's user will be $USER and its home will be '/$USER/home'
+ARG UID=1000
+ARG GID=1000
 ARG USER_NAME=user
 ARG USER_HOME=/home/$USER_NAME
 
 # create a new user within the Docker container
-RUN useradd -m -s /bin/bash $USER_NAME \
+RUN groupadd -g $GID -o $USER_NAME \
+    && useradd -m -u $UID -g $GID -o -s /bin/bash $USER_NAME \
     && echo "$USER_NAME:Docker!" | chpasswd \
     && mkdir -p /src && chown -R $USER_NAME:$USER_NAME /src \
     && mkdir -p /etc/sudoers.d \
     && usermod -aG video $USER_NAME \
     && echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
-
-USER $USER_NAME
-WORKDIR $USER_HOME
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------------
 # FINAL SETUPS
@@ -105,6 +105,9 @@ RUN for file in ./tmp/*; do \
 
 # if you need to download .whl packages from a link
 # RUN python -m pip download --only-binary :all: --dest . --no-cache PACKAGE-DOWNLOAD-LINK.whl
+
+USER $USER_NAME
+WORKDIR $USER_HOME
 
 # remove all the created/copied/moved file by the docker
 RUN rm -rf *
