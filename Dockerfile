@@ -96,15 +96,25 @@ RUN pip install --upgrade pip
 # |   |       |-- base.txt
 # |   |       |-- devel.txt
 
-RUN mkdir ./tmp
+RUN mkdir -p ./tmp
 COPY ./src/requirements/* ./tmp/
 
 RUN for file in ./tmp/*; do \
         python3 -m pip install -r $file; \
     done
 
-# if you need to download .whl packages from a link
+# .WHL INSTALL: if you need to download .whl packages from a link
 # RUN python -m pip download --only-binary :all: --dest . --no-cache PACKAGE-DOWNLOAD-LINK.whl
+
+# CONDA ENVIRONMENT INSTALL: if you need to use a conda environment within the docker
+# ENV CONDA_DIR /opt/conda
+# RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda
+# ENV PATH=$CONDA_DIR/bin:$PATH
+
+# COPY ../src/environment.yml ./tmp/environment.yml
+# RUN conda env create -f tmp/environment.yml
+# RUN /bin/bash -c "conda init bash"
+# RUN echo "source /opt/conda/bin/activate your_environment_name" >> /home/${USER_NAME}/.bashrc
 
 USER $USER_NAME
 WORKDIR $USER_HOME
