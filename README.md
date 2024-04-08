@@ -90,9 +90,15 @@ once the extensions have been installed and after launching the docker *run* scr
 
 It's not over here, one last step is missing! Go to File>Open Folder -> enter "/home/user" as the path
 
+## Support & solutions
+Here is listed what ai-base-docker is currently able to install and run:
+ - CUDA & cudnn
+ - ubunutu packages (apt install)
+ - Python, pip and multiple requirements.txt install
+ - Python .whl install
+ - Anaconda 
 
 ## Contributions
-
 If you find errors or have suggestions for improving this project, feel free to open an issue or send a pull request.
 
 tested with docker version: 24.0.7
