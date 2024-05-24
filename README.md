@@ -90,6 +90,16 @@ once the extensions have been installed and after launching the docker *run* scr
 
 It's not over here, one last step is missing! Go to File>Open Folder -> enter "/home/user" as the path
 
+## Remote Host Connection
+The script `remote.sh` configurest the local host and the remote host in order to run the docker remotely but develop through VSCode on the local machine. It creates a local SSH key to be used later to attach docker to the remote container, and adds that key into the remote host `~/.ssh/authorized_keys`. Then it creates a local `~/.ssh/config` pointing to that remote host, with the generated key. Finally it updates a docker context on the local machine in order to connect and list the containers running on the remote machine.
+
+```
+# Usage
+
+chmod +x remote.sh
+./remote.sh
+```
+
 ## Support & solutions
 Here is listed what ai-base-docker is currently able to install and run:
  - CUDA & cudnn
@@ -97,6 +107,7 @@ Here is listed what ai-base-docker is currently able to install and run:
  - Python, pip and multiple requirements.txt install
  - Python .whl install
  - Anaconda 
+ - Remote Host Connection
 
 ## Contributions
 If you find errors or have suggestions for improving this project, feel free to open an issue or send a pull request.
