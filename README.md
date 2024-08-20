@@ -1,4 +1,6 @@
 # ai-base-docker
+![Designer](https://github.com/user-attachments/assets/1bb22c91-bfa7-451f-ba5b-165ef103b889)
+
 This docker aims to support research in being able to run their projects on different machines, and be able to share them in the best way.
 
 ### Why do I need a Docker?
