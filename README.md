@@ -110,6 +110,7 @@ Here is listed what ai-base-docker is currently able to install and run:
  - Python .whl install
  - Anaconda 
  - Remote Host Connection
+ - ROS Noetic automatic installation within Dockerfile
 
 ## Contributions
 If you find errors or have suggestions for improving this project, feel free to open an issue or send a pull request.
