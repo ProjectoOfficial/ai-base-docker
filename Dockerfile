@@ -106,6 +106,7 @@ RUN for file in ./tmp/*; do \
 # .WHL INSTALL: if you need to download .whl packages from a link
 # RUN python -m pip download --only-binary :all: --dest . --no-cache PACKAGE-DOWNLOAD-LINK.whl
 
+# --- ANACONDA ---
 # CONDA ENVIRONMENT INSTALL: if you need to use a conda environment within the docker
 # ENV CONDA_DIR /opt/conda
 # RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda
@@ -116,8 +117,24 @@ RUN for file in ./tmp/*; do \
 # RUN /bin/bash -c "conda init bash"
 # RUN echo "source /opt/conda/bin/activate your_environment_name" >> /home/${USER_NAME}/.bashrc
 
+# --- ROS NOETIC (you must use Ubuntu 20.04) ---
+#RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros-latest.list
+
+# RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+# RUN apt-get update 
+# RUN apt-get install -y -q ros-noetic-desktop-full
+# RUN apt-get install -y -q \
+#         python3-rosdep \
+#         python3-rosinstall \
+#         python3-rosinstall-generator \
+#         python3-wstool \
+#         build-essential
+
+# RUN echo '#!/bin/bash\nsource /opt/ros/noetic/setup.bash\nexec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+
 USER $USER_NAME
 WORKDIR $USER_HOME
+# ENTRYPOINT ["/entrypoint.sh"] # Always for ROS
 
 # remove all the created/copied/moved file by the docker
 RUN rm -rf *
