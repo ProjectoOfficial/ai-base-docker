@@ -34,6 +34,10 @@ for file in "${files[@]}"; do
     fi
 done
 
+
+echo ""
+read -p "Please provide a name for the remote connection: " remote_name
+
 echo ""
 read -p "Please provide your email: " email
 remote_key="$CURRENT_PATH/remote_key"
@@ -75,8 +79,12 @@ chmod 600 ~/.ssh/config
 echo ""
 echo "Creating docker context remote..."
 docker context use default
-docker context rm remote -f
-docker context create remote --docker "host=ssh://remotedocker"
-docker context use remote
-docker --context remote ps
+#docker context rm remote -f
+docker context create $remote_name --docker "host=ssh://remotedocker"
+docker context use $remote_name
+docker --context $remote_name ps
 
+echo "Done! To change docker context just run 'docker context use "new_context" (e.g. default)'"
+echo "To remove the remote connection you just created, type: docker context rm $remote_name -f"
+
+exit 0
