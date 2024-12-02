@@ -20,8 +20,14 @@ in addition to proposing this tool which I think is useful for better managing o
 ## Docker setup
 1. Please follow docker base installation: 
     https://docs.docker.com/engine/install/
+   or install docker with the following commands:
+   ```
+   wget https://get.docker.com/ -O get_docker.sh
+   chmod +x get_docker.sh
+   bash get_docker.sh
+   ```
 
-2. Once docker has been installed, install nvidia-docker2 for GPU support (otherwise you can follow [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) procedure (Recommended) ):
+3. Once docker has been installed, install nvidia-docker2 for GPU support (otherwise you can follow [this](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) procedure (Recommended) ):
     ```
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
     && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
@@ -41,14 +47,14 @@ in addition to proposing this tool which I think is useful for better managing o
     sudo systemctl restart docker
     ```
 
-3. Add required permissions to your user in order to perform actions with docker on containers
+4. Add required permissions to your user in order to perform actions with docker on containers
     ```
     sudo groupadd docker
     sudo usermod -aG docker $USER
     newgrp docker
     ```
 
-4. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
+5. Import and build docker image: please note that here you are downloading ubuntu, cuda and pytorch, and it may take several minutes
     
     - Importing ai-base-docker as submodule (to use it as it is)
         ```
@@ -73,7 +79,7 @@ in addition to proposing this tool which I think is useful for better managing o
     ./build.sh
     ```
 
-5. run docker image:
+6. run docker image:
     ```
     ./run.sh
     ```
@@ -111,6 +117,8 @@ Here is listed what ai-base-docker is currently able to install and run:
  - Anaconda 
  - Remote Host Connection
  - ROS Noetic automatic installation within Dockerfile
+ - Pre-configured containers for: Raspbery Pi, NVIDIA Jetson Orin Nano, NVIDIA Jetson Nano
+ - Automatic device detection for container build an run
 
 ## Contributions
 If you find errors or have suggestions for improving this project, feel free to open an issue or send a pull request.
