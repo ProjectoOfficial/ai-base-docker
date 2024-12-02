@@ -1,0 +1,118 @@
+FROM nvcr.io/nvidia/l4t-base:r32.7.1
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------------
+# ENVIRONMENT SETTINGS
+# In this section we want to specify which softwares we want to pre-install within the docker
+
+# to be sure we set non interactive bash also here
+ENV DEBIAN_FRONTEND=noninteractive
+
+# configuration for x11 forwarding
+LABEL com.nvidia.volumes.needed="nvidia-docker"
+ENV PATH=/usr/local/cuda/bin:${PATH}
+ENV PATH=/usr/local/nvidia/bin:${PATH}
+ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q \
+    x11-apps mesa-utils && rm -rf /var/lib/apt/lists/*
+
+# remove all the packages within Debian base configuration (not wasting time installing things that will not be used)
+RUN rm -f /etc/apt/sources.list.d/*.list
+
+# install Ubuntu Software needed for the development (DEBIAN_FRONTEND="noninteractive" needed to avoid human interaction in the process)
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" && apt-get install -y -q\
+    sudo \
+    nano \
+    tmux \
+    git \
+    curl \
+    wget \
+    bash \
+    bash-completion \
+    build-essential \
+    ffmpeg \
+    python3.6 \
+    python3.6-dev \
+    python3-pip \
+    python3-tk \
+&& rm -rf /var/lib/apt/lists/*
+
+# set python update alternatives - the highest is the preferred one
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+RUN update-alternatives --config python3
+
+# remove python2
+RUN ln -sf /usr/bin/python3 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------------
+# USER SETTINGS
+
+# the docker's user will be $USER and its home will be '/$USER/home'
+ARG UID=1000
+ARG GID=1000
+ARG USER_NAME=user
+ARG USER_HOME=/home/$USER_NAME
+
+# create a new user within the Docker container
+RUN groupadd -g $GID -o $USER_NAME \
+    && useradd -m -u $UID -g $GID -o -s /bin/bash $USER_NAME \
+    && echo "$USER_NAME:Docker!" | chpasswd \
+    && mkdir -p /src && chown -R $USER_NAME:$USER_NAME /src \
+    && mkdir -p /etc/sudoers.d \
+    && usermod -aG video $USER_NAME \
+    && echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------------
+# FINAL SETUPS
+
+# upgrade python pip
+RUN pip install --upgrade pip
+
+# install python packages in requirements directory
+# project/
+# |-- ai-base-docker/
+# |   |   |-- build.sh
+# |   |   |-- Dockerfile
+# |   |   |-- run.sh
+# |-- src/
+# |   |   |-- model/
+# |   |   |-- utils/
+# |   |   |-- requirements/
+# |   |       |-- base.txt
+# |   |       |-- devel.txt
+
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" && apt-get install -y -q\
+    cmake \
+    libgtk2.0-dev \
+    pkg-config \
+    libopenblas-dev \
+    libopenmpi-dev \
+    software-properties-common \
+    protobuf-compiler \
+    libprotobuf-dev
+
+RUN mkdir -p ./tmp
+COPY ./src/requirements/* ./tmp/
+
+ENV REQUIREMENTS_FILES="jetson_nano.txt "
+
+ENV OPENBLAS_CORETYPE=ARMV8
+
+RUN python3 -m pip download --only-binary :all: --dest . --no-cache http://jetson.webredirect.org/jp4/cu102/+f/aff/23b5514cc2c4b/torch-1.10.0-cp36-cp36m-linux_aarch64.whl#sha256=aff23b5514cc2c4b9e30f1b8e2077de031499b2ac21b13fb131c3ac05291e603
+RUN python3 -m pip install ./torch-1.10.0-cp36-cp36m-linux_aarch64.whl
+RUN python3 -m pip download --only-binary :all: --dest . --no-cache http://jetson.webredirect.org/jp4/cu102/+f/983/e3e1890677343/torchvision-0.11.0a0+fa347eb-cp36-cp36m-linux_aarch64.whl#sha256=983e3e18906773436e5c0f2c42989d196d0703a0487495c21f106da5705b9acf
+RUN python3 -m pip install ./torchvision-0.11.0a0+fa347eb-cp36-cp36m-linux_aarch64.whl
+RUN python3 -m pip download --only-binary :all: --dest . http://jetson.webredirect.org/jp4/cu102/+f/7b8/91d9902e7bf10/torchaudio-0.10.0+d2634d8-cp36-cp36m-linux_aarch64.whl#sha256=7b891d9902e7bf1045459b8836e93f5443e9f848a19b3e43a8205932e24ee28b
+RUN python3 -m pip install ./torchaudio-0.10.0+d2634d8-cp36-cp36m-linux_aarch64.whl
+
+RUN wget https://nvidia.box.com/shared/static/8sc6j25orjcpl6vhq3a4ir8v219fglng.whl -O install onnxruntime_gpu-1.4.0-cp36-cp36m-linux_aarch64.whl
+RUN pip3 install onnxruntime_gpu-1.4.0-cp36-cp36m-linux_aarch64.whl
+
+USER $USER_NAME
+WORKDIR $USER_HOME
+
+# remove all the created/copied/moved file by the docker
+RUN rm -rf *
+
+# when the container is launched it will start a bash session
+CMD ["/bin/bash"]
